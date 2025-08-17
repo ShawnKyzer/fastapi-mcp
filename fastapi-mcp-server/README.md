@@ -13,15 +13,27 @@ A Model Context Protocol (MCP) server that provides semantic search capabilities
 
 ## Prerequisites
 
+### All Platforms
 - Python 3.11+
 - Docker and Docker Compose (for Elasticsearch)
 - uv (Python package manager)
+
+### Windows 11 Specific
+- PowerShell 5.1+ or PowerShell Core 7+
+- Windows Terminal (recommended)
+- Docker Desktop for Windows
 
 ## Quick Start
 
 ### 1. Start Elasticsearch
 
+**Linux/macOS:**
 ```bash
+docker-compose up -d
+```
+
+**Windows (PowerShell):**
+```powershell
 docker-compose up -d
 ```
 
@@ -32,15 +44,29 @@ docker-compose ps
 
 ### 2. Install Dependencies
 
+**All Platforms:**
 ```bash
 uv sync
 ```
 
 ### 3. Run the MCP Server
 
+**Linux/macOS:**
 ```bash
 # Using the wrapper script (recommended for MCP clients)
 ./run_mcp.sh
+
+# Or directly
+uv run python main.py
+```
+
+**Windows:**
+```powershell
+# Using PowerShell wrapper (recommended for MCP clients)
+.\run_mcp.ps1
+
+# Using batch file
+.\run_mcp.bat
 
 # Or directly
 uv run python main.py
@@ -99,7 +125,8 @@ Get all available tags for filtering searches.
 ## Integration with AI Assistants
 
 ### Windsurf
-Add to your Windsurf MCP configuration (`~/.codeium/windsurf/mcp_config.json`):
+
+**Linux/macOS** - Add to your Windsurf MCP configuration (`~/.codeium/windsurf/mcp_config.json`):
 ```json
 {
   "fastapi-docs": {
@@ -109,8 +136,19 @@ Add to your Windsurf MCP configuration (`~/.codeium/windsurf/mcp_config.json`):
 }
 ```
 
+**Windows** - Add to your Windsurf MCP configuration (`%USERPROFILE%\.codeium\windsurf\mcp_config.json`):
+```json
+{
+  "fastapi-docs": {
+    "command": "powershell.exe",
+    "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp-server\\run_mcp.ps1"]
+  }
+}
+```
+
 ### Claude Desktop
-Add to your Claude Desktop configuration:
+
+**Linux/macOS** - Add to your Claude Desktop configuration:
 ```json
 {
   "mcpServers": {
@@ -122,7 +160,19 @@ Add to your Claude Desktop configuration:
 }
 ```
 
-**Note**: Replace `/path/to/fastapi-mcp-server/` with the actual absolute path to your installation directory.
+**Windows** - Add to your Claude Desktop configuration (`%APPDATA%\Claude\claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "fastapi-docs": {
+      "command": "powershell.exe",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp-server\\run_mcp.ps1"]
+    }
+  }
+}
+```
+
+**Note**: Replace the paths with the actual absolute path to your installation directory.
 
 ## Development
 
@@ -145,7 +195,9 @@ fastapi-mcp-server/
 ├── docs/                   # Additional documentation
 │   └── AI_ASSISTANT_INTEGRATION.md
 ├── main.py                 # Entry point
-├── run_mcp.sh             # MCP client wrapper script
+├── run_mcp.sh             # MCP wrapper script (Linux/macOS)
+├── run_mcp.ps1            # MCP wrapper script (Windows PowerShell)
+├── run_mcp.bat            # MCP wrapper script (Windows Batch)
 ├── docker-compose.yml     # Elasticsearch setup
 ├── pyproject.toml         # Dependencies and project config
 └── README.md              # This file
@@ -153,21 +205,35 @@ fastapi-mcp-server/
 
 ### Testing the Server
 
-1. Start Elasticsearch:
-   ```bash
-   docker-compose up -d
-   ```
+**1. Start Elasticsearch:**
 
-2. Run the server directly:
-   ```bash
-   uv run python main.py
-   ```
+Linux/macOS:
+```bash
+docker-compose up -d
+```
 
-3. Test with MCP client tools (available when connected to an AI assistant):
-   - `search_fastapi_docs`: Search documentation
-   - `get_fastapi_doc_by_id`: Get specific document
-   - `refresh_fastapi_docs`: Update documentation
-   - `get_available_tags`: List available tags
+Windows (PowerShell):
+```powershell
+docker-compose up -d
+```
+
+**2. Run the server directly:**
+
+Linux/macOS:
+```bash
+uv run python main.py
+```
+
+Windows (PowerShell):
+```powershell
+uv run python main.py
+```
+
+**3. Test with MCP client tools** (available when connected to an AI assistant):
+- `search_fastapi_docs`: Search documentation
+- `get_fastapi_doc_by_id`: Get specific document
+- `refresh_fastapi_docs`: Update documentation
+- `get_available_tags`: List available tags
 
 ### Customization
 
@@ -181,13 +247,27 @@ Edit `src/config.py` to customize:
 
 ### CLI Data Loader
 Use the CLI tool to manually load or refresh documentation:
+
+Linux/macOS:
 ```bash
+uv run python scripts/data_loader_cli.py
+```
+
+Windows (PowerShell):
+```powershell
 uv run python scripts/data_loader_cli.py
 ```
 
 ### Kibana Dashboard
 Set up Kibana for monitoring and visualization:
+
+Linux/macOS:
 ```bash
+uv run python scripts/setup_kibana_dashboard.py
+```
+
+Windows (PowerShell):
+```powershell
 uv run python scripts/setup_kibana_dashboard.py
 ```
 
@@ -208,9 +288,17 @@ uv run python scripts/setup_kibana_dashboard.py
 - Reduce `max_results` in search queries
 
 ### MCP Configuration Issues
+
+**Linux/macOS:**
 - Ensure the wrapper script has execute permissions: `chmod +x run_mcp.sh`
 - Use absolute paths in MCP configuration
 - Check that Elasticsearch is running before starting the MCP server
+
+**Windows:**
+- Ensure PowerShell execution policy allows script execution: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+- Use absolute paths with proper Windows path format (e.g., `C:\path\to\file`)
+- For PowerShell scripts in MCP config, use `powershell.exe` with `-ExecutionPolicy Bypass` flag
+- Check that Docker Desktop is running before starting the MCP server
 
 ## License
 

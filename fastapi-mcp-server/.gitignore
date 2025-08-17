@@ -47,6 +47,16 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
+# Windows
+*.exe
+*.msi
+*.msm
+*.msp
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.lnk
+
 # Project specific
 /tmp/
 *.log

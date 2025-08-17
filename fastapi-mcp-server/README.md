@@ -137,6 +137,13 @@ fastapi-mcp-server/
 │   ├── document_processor.py # Documentation processing
 │   └── data_loader.py      # Data loading and indexing
 ├── tests/                  # Test suite
+├── scripts/                # Utility scripts
+│   ├── data_loader_cli.py  # CLI for data loading
+│   └── setup_kibana_dashboard.py # Kibana dashboard setup
+├── dashboards/             # Kibana dashboards
+│   └── kibana-dashboard.ndjson
+├── docs/                   # Additional documentation
+│   └── AI_ASSISTANT_INTEGRATION.md
 ├── main.py                 # Entry point
 ├── run_mcp.sh             # MCP client wrapper script
 ├── docker-compose.yml     # Elasticsearch setup
@@ -170,6 +177,20 @@ Edit `src/config.py` to customize:
 - **Repository Path**: Adjust `TEMP_REPO_PATH` (default: `/tmp/fastapi_repo`)
 - **FastAPI Repository**: Change `FASTAPI_REPO_URL` if using a fork
 
+## Additional Tools
+
+### CLI Data Loader
+Use the CLI tool to manually load or refresh documentation:
+```bash
+uv run python scripts/data_loader_cli.py
+```
+
+### Kibana Dashboard
+Set up Kibana for monitoring and visualization:
+```bash
+uv run python scripts/setup_kibana_dashboard.py
+```
+
 ## Troubleshooting
 
 ### Elasticsearch Connection Issues
@@ -185,6 +206,11 @@ Edit `src/config.py` to customize:
 ### Memory Issues
 - Increase Elasticsearch heap size in `docker-compose.yml`
 - Reduce `max_results` in search queries
+
+### MCP Configuration Issues
+- Ensure the wrapper script has execute permissions: `chmod +x run_mcp.sh`
+- Use absolute paths in MCP configuration
+- Check that Elasticsearch is running before starting the MCP server
 
 ## License
 

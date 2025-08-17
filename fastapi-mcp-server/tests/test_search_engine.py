@@ -21,21 +21,21 @@ class TestElasticsearchEngine:
     async def test_create_index_new(self, mock_es_class):
         """Test creating a new index."""
         mock_es = AsyncMock()
-        mock_es.indices.exists.return_value = False
+        mock_es.indices.get.side_effect = Exception("Index not found")
         mock_es.indices.create.return_value = {"acknowledged": True}
         mock_es_class.return_value = mock_es
         
         engine = ElasticsearchEngine("http://localhost:9200", "test_index")
         await engine.create_index()
         
-        mock_es.indices.exists.assert_called_once_with(index="test_index")
+        mock_es.indices.get.assert_called_once_with(index="test_index")
         mock_es.indices.create.assert_called_once()
     
     @patch('src.search_engine.AsyncElasticsearch')
     async def test_create_index_existing(self, mock_es_class):
         """Test creating index when one already exists."""
         mock_es = AsyncMock()
-        mock_es.indices.exists.return_value = True
+        mock_es.indices.get.return_value = {"test_index": {}}
         mock_es.indices.delete.return_value = {"acknowledged": True}
         mock_es.indices.create.return_value = {"acknowledged": True}
         mock_es_class.return_value = mock_es
@@ -43,6 +43,7 @@ class TestElasticsearchEngine:
         engine = ElasticsearchEngine("http://localhost:9200", "test_index")
         await engine.create_index()
         
+        mock_es.indices.get.assert_called_once_with(index="test_index")
         mock_es.indices.delete.assert_called_once_with(index="test_index")
         mock_es.indices.create.assert_called_once()
     

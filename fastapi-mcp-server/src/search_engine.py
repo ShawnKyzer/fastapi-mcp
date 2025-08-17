@@ -44,14 +44,24 @@ class ElasticsearchEngine(ISearchEngine):
         }
         
         try:
-            if await self.es.indices.exists(index=self.index_name):
+            # Check if index exists and delete if it does
+            try:
+                await self.es.indices.get(index=self.index_name)
                 await self.es.indices.delete(index=self.index_name)
                 logger.info(f"Deleted existing index: {self.index_name}")
+            except Exception:
+                # Index doesn't exist, which is fine
+                pass
             
-            await self.es.indices.create(index=self.index_name, body=mapping)
+            # Create index with mapping and settings
+            await self.es.indices.create(
+                index=self.index_name,
+                body=mapping
+            )
             logger.info(f"Created index: {self.index_name}")
         except Exception as e:
             logger.error(f"Failed to create index: {e}")
+            logger.error(f"Index mapping: {mapping}")
             raise
     
     async def index_documents(self, documents: List[DocumentChunk]) -> None:

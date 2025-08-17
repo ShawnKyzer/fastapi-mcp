@@ -1,19 +1,20 @@
 # FastAPI MCP Server
 
-A Model Context Protocol (MCP) server that fetches the latest FastAPI documentation from GitHub and indexes it in Elasticsearch for AI coding assistants like Amazon Q, Windsurf, and Kiro.
+A Model Context Protocol (MCP) server that provides semantic search capabilities for FastAPI documentation. It fetches the latest FastAPI documentation from GitHub, indexes it in Elasticsearch, and exposes search tools for AI coding assistants.
 
 ## Features
 
 - **Automatic Documentation Fetching**: Clones/updates the latest FastAPI documentation from the official GitHub repository
 - **Elasticsearch Integration**: Indexes documentation with semantic search capabilities
 - **Smart Content Processing**: Extracts and chunks documentation with proper tagging
-- **MCP Compatible**: Works with Amazon Q, Windsurf, Kiro, and other MCP-compatible AI assistants
+- **MCP Compatible**: Works with Windsurf, Claude Desktop, and other MCP-compatible AI assistants
 - **Tag-based Filtering**: Search by specific topics (API, Pydantic, async, dependencies, security, etc.)
+- **Real-time Updates**: Refresh documentation on demand
 
 ## Prerequisites
 
 - Python 3.11+
-- Docker and Docker Compose
+- Docker and Docker Compose (for Elasticsearch)
 - uv (Python package manager)
 
 ## Quick Start
@@ -38,13 +39,17 @@ uv sync
 ### 3. Run the MCP Server
 
 ```bash
-uv run python fastapi_mcp_server.py
+# Using the wrapper script (recommended for MCP clients)
+./run_mcp.sh
+
+# Or directly
+uv run python main.py
 ```
 
 The server will automatically:
-- Clone the FastAPI repository
-- Extract and process documentation
-- Create and populate the Elasticsearch index
+- Connect to Elasticsearch
+- Check if documentation index exists
+- Clone FastAPI repository and index documentation if needed
 - Start the MCP server on stdio transport
 
 ## Available Tools
@@ -93,53 +98,50 @@ Get all available tags for filtering searches.
 
 ## Integration with AI Assistants
 
-### Amazon Q
-Add the server to your Amazon Q configuration:
+### Windsurf
+Add to your Windsurf MCP configuration (`~/.codeium/windsurf/mcp_config.json`):
+```json
+{
+  "fastapi-docs": {
+    "command": "/path/to/fastapi-mcp-server/run_mcp.sh",
+    "args": []
+  }
+}
+```
+
+### Claude Desktop
+Add to your Claude Desktop configuration:
 ```json
 {
   "mcpServers": {
     "fastapi-docs": {
-      "command": "uv",
-      "args": ["run", "python", "/path/to/fastapi_mcp_server.py"]
+      "command": "/path/to/fastapi-mcp-server/run_mcp.sh",
+      "args": []
     }
   }
 }
 ```
 
-### Windsurf
-Add to your Windsurf MCP configuration:
-```json
-{
-  "fastapi-docs": {
-    "command": "uv",
-    "args": ["run", "python", "/path/to/fastapi_mcp_server.py"],
-    "cwd": "/path/to/fastapi-mcp-server"
-  }
-}
-```
-
-### Kiro
-Configure in Kiro settings:
-```json
-{
-  "mcp_servers": {
-    "fastapi-docs": {
-      "command": ["uv", "run", "python", "/path/to/fastapi_mcp_server.py"],
-      "cwd": "/path/to/fastapi-mcp-server"
-    }
-  }
-}
-```
+**Note**: Replace `/path/to/fastapi-mcp-server/` with the actual absolute path to your installation directory.
 
 ## Development
 
 ### Project Structure
 ```
 fastapi-mcp-server/
-├── fastapi_mcp_server.py    # Main MCP server
-├── docker-compose.yml       # Elasticsearch setup
-├── pyproject.toml          # Dependencies
-└── README.md               # This file
+├── src/                     # Source code modules
+│   ├── config.py           # Configuration settings
+│   ├── mcp_server.py       # Main MCP server implementation
+│   ├── search_engine.py    # Elasticsearch integration
+│   ├── document_fetcher.py # GitHub repository fetching
+│   ├── document_processor.py # Documentation processing
+│   └── data_loader.py      # Data loading and indexing
+├── tests/                  # Test suite
+├── main.py                 # Entry point
+├── run_mcp.sh             # MCP client wrapper script
+├── docker-compose.yml     # Elasticsearch setup
+├── pyproject.toml         # Dependencies and project config
+└── README.md              # This file
 ```
 
 ### Testing the Server
@@ -149,33 +151,24 @@ fastapi-mcp-server/
    docker-compose up -d
    ```
 
-2. Run the server:
+2. Run the server directly:
    ```bash
-   uv run python fastapi_mcp_server.py
+   uv run python main.py
    ```
 
-3. Test with FastMCP client:
-   ```python
-   import asyncio
-   from fastmcp import Client
-   
-   async def test_search():
-       client = Client("fastapi_mcp_server.py")
-       async with client:
-           result = await client.call_tool("search_fastapi_docs", {
-               "query": "create API endpoint",
-               "max_results": 3
-           })
-           print(result)
-   
-   asyncio.run(test_search())
-   ```
+3. Test with MCP client tools (available when connected to an AI assistant):
+   - `search_fastapi_docs`: Search documentation
+   - `get_fastapi_doc_by_id`: Get specific document
+   - `refresh_fastapi_docs`: Update documentation
+   - `get_available_tags`: List available tags
 
 ### Customization
 
-- **Elasticsearch URL**: Modify `ELASTICSEARCH_URL` in the server code
-- **Index Name**: Change `INDEX_NAME` for different index names
-- **Repository Path**: Adjust `TEMP_REPO_PATH` for different clone locations
+Edit `src/config.py` to customize:
+- **Elasticsearch URL**: Change `ELASTICSEARCH_URL` (default: `http://localhost:9200`)
+- **Index Name**: Modify `INDEX_NAME` (default: `fastapi_docs`)
+- **Repository Path**: Adjust `TEMP_REPO_PATH` (default: `/tmp/fastapi_repo`)
+- **FastAPI Repository**: Change `FASTAPI_REPO_URL` if using a fork
 
 ## Troubleshooting
 

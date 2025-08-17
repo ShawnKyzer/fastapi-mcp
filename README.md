@@ -2,6 +2,51 @@
 
 A Model Context Protocol (MCP) server that provides semantic search capabilities for FastAPI documentation. It fetches the latest FastAPI documentation from GitHub, indexes it in Elasticsearch, and exposes search tools for AI coding assistants.
 
+## Architecture Overview
+
+```mermaid
+sequenceDiagram
+    participant AI as AI Assistant<br/>(Windsurf/Claude)
+    participant MCP as FastAPI MCP Server
+    participant ES as Elasticsearch
+    participant GH as GitHub<br/>(FastAPI Repo)
+    participant FS as File System
+
+    Note over AI,FS: Server Initialization
+    AI->>MCP: Start MCP Server
+    MCP->>ES: Check if index exists
+    alt Index doesn't exist
+        MCP->>GH: Clone FastAPI repository
+        GH-->>FS: Download docs to /tmp/fastapi_repo
+        MCP->>FS: Process markdown files
+        FS-->>MCP: Extracted content & metadata
+        MCP->>ES: Index documentation chunks
+        ES-->>MCP: Indexing complete
+    else Index exists
+        MCP-->>AI: Server ready
+    end
+
+    Note over AI,FS: Search Operations
+    AI->>MCP: search_fastapi_docs("async dependencies")
+    MCP->>ES: Semantic search query
+    ES-->>MCP: Ranked results with highlights
+    MCP-->>AI: Formatted search results
+
+    AI->>MCP: get_fastapi_doc_by_id("doc_123")
+    MCP->>ES: Fetch document by ID
+    ES-->>MCP: Full document content
+    MCP-->>AI: Complete documentation section
+
+    Note over AI,FS: Refresh Operations
+    AI->>MCP: refresh_fastapi_docs()
+    MCP->>GH: Pull latest changes
+    GH-->>FS: Updated documentation
+    MCP->>FS: Re-process changed files
+    MCP->>ES: Update index
+    ES-->>MCP: Refresh complete
+    MCP-->>AI: "Documentation updated successfully"
+```
+
 ## Features
 
 - **Automatic Documentation Fetching**: Clones/updates the latest FastAPI documentation from the official GitHub repository

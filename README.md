@@ -130,7 +130,7 @@ Get all available tags for filtering searches.
 ```json
 {
   "fastapi-docs": {
-    "command": "/path/to/fastapi-mcp-server/run_mcp.sh",
+    "command": "/path/to/fastapi-mcp/run_mcp.sh",
     "args": []
   }
 }
@@ -141,7 +141,7 @@ Get all available tags for filtering searches.
 {
   "fastapi-docs": {
     "command": "powershell.exe",
-    "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp-server\\run_mcp.ps1"]
+    "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp\\run_mcp.ps1"]
   }
 }
 ```
@@ -153,7 +153,7 @@ Get all available tags for filtering searches.
 {
   "mcpServers": {
     "fastapi-docs": {
-      "command": "/path/to/fastapi-mcp-server/run_mcp.sh",
+      "command": "/path/to/fastapi-mcp/run_mcp.sh",
       "args": []
     }
   }
@@ -166,7 +166,7 @@ Get all available tags for filtering searches.
   "mcpServers": {
     "fastapi-docs": {
       "command": "powershell.exe",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp-server\\run_mcp.ps1"]
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\path\\to\\fastapi-mcp\\run_mcp.ps1"]
     }
   }
 }
@@ -178,7 +178,7 @@ Get all available tags for filtering searches.
 
 ### Project Structure
 ```
-fastapi-mcp-server/
+fastapi-mcp/
 ├── src/                     # Source code modules
 │   ├── config.py           # Configuration settings
 │   ├── mcp_server.py       # Main MCP server implementation
